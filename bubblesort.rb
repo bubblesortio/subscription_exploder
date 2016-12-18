@@ -19,9 +19,9 @@ module BubbleSort
   VARIANT_COUNT = {1218878945=>(6..11), 1195972389=>(0..5), 1342622465=>(0..11)}
   VARIANT_ZINES = VARIANT_COUNT.map{|id, range| [id, ZINE_NAMES[range]] }.to_h
 
-  def self.zines_since(last_id)
+  def self.zines_since(last_processed_id)
     zines_to_order = []
-    ShopifyAPI::Order.find_all(since_id: last_order_id).each do |sub|
+    ShopifyAPI::Order.find_all(since_id: last_processed_id) do |sub|
       sub.line_items.each do |li|
         next unless VARIANT_ZINES.has_key?(li.variant_id)
         names = VARIANT_ZINES[li.variant_id]
@@ -62,9 +62,11 @@ module BubbleSort
   end
 
   def self.explode_orders!
-    last_processed_id = ExplodedOrders.order("shopify_id DESC").last.shopify_id
+    eo = ExplodedOrder.order("shopify_id DESC").last
+    last_processed_id = eo.nil? ? 1 : eo.shopify_id
     zines_to_order = zines_since(last_processed_id)
-    ExplodedOrders.create!(shopify_id: zines_to_order.map(&:id).max)
+    last_processed_id = zines_to_order.map{|z| z[:id]}.max
+    ExplodedOrder.create!(shopify_id: last_processed_id) if last_processed_id
     create_orders(zines_to_order)
   end
 

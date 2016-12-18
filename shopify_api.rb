@@ -1,5 +1,9 @@
 require "shopify_api"
 
+SHOPIFY_API_KEY = ENV.fetch("SHOPIFY_API_KEY")
+SHOPIFY_API_PASSWORD = ENV.fetch("SHOPIFY_API_PASSWORD")
+ShopifyAPI::Base.site = "https://#{SHOPIFY_API_KEY}:#{SHOPIFY_API_PASSWORD}@bubblesort-zines.myshopify.com/admin"
+
 module ShopifyAPI
   class Base
     RETRY_AFTER = 60
