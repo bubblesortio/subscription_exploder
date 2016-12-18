@@ -82,7 +82,7 @@ module BubbleSort
   end
 
   def self.explode_orders!
-    eo = ExplodedOrder.order("shopify_id DESC").last
+    eo = ExplodedOrder.order(:shopify_id).last
     last_processed_id = eo.nil? ? 1 : eo.shopify_id
 
     zines_since(last_processed_id).each do |subscription|
