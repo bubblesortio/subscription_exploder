@@ -29,6 +29,7 @@ GEM
       rack
     rails-observers (0.1.2)
       activemodel (~> 4.0)
+    rake (10.4.2)
     shopify_api (4.3.3)
       activeresource (>= 3.0.0)
       rack
@@ -49,6 +50,7 @@ PLATFORMS
 
 DEPENDENCIES
   pg
+  rake
   shopify_api
   sinatra
   sinatra-activerecord
