@@ -1,4 +1,4 @@
-require_relative "./exploded_orders"
+require_relative "./exploded_order"
 require_relative "./shopify_api"
 
 module BubbleSort
