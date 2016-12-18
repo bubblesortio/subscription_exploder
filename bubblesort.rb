@@ -19,6 +19,27 @@ module BubbleSort
   VARIANT_COUNT = {1218878945=>(6..11), 1195972389=>(0..5), 1342622465=>(0..11)}
   VARIANT_ZINES = VARIANT_COUNT.map{|id, range| [id, ZINE_NAMES[range]] }.to_h
 
+  def self.with_retry
+    default_retry = 60
+    retried = false
+
+    begin
+      yield
+      retried = false
+    rescue ActiveResource::ConnectionError, ActiveResource::ServerError,
+      ActiveResource::ClientError => ex
+      unless retried
+        header_retry = ex.respond_to?(:response) && ex.response['Retry-After']
+        retry_after = (header_retry || default_retry).to_i
+        sleep(retry_after)
+        retried = true
+        retry
+      else
+        raise ex
+      end
+    end
+  end
+
   def self.zines_since(last_processed_id)
     zines_to_order = []
     ShopifyAPI::Order.find_all(since_id: last_processed_id) do |sub|
@@ -39,34 +60,33 @@ module BubbleSort
     zines_to_order
   end
 
-  def self.create_orders(zines_to_order)
-    zines_to_order.each do |to_order|
-      to_order[:zines].each do |title|
-        puts "Creating exploded order of #{title} for #{to_order[:email]} from order #{to_order[:number]}"
-        ShopifyAPI::Order.create(
-          email: to_order[:email],
-          financial_status: "paid",
-          shipping_address: to_order[:shipping_address],
-          note: "From order #{to_order[:number]}. Note: #{to_order[:note]}",
-          line_items: [{
-            quantity: to_order[:quantity],
-            title: title,
-            price: 15.00,
-            requires_shipping: true,
-            grams: 114,
-          }]
-        )
-      end
+  def self.create_orders(to_order)
+    to_order[:zines].each do |title|
+      puts "Creating exploded order of #{title} for #{to_order[:email]} from order #{to_order[:number]}"
+      ShopifyAPI::Order.create(
+        email: to_order[:email],
+        financial_status: "paid",
+        shipping_address: to_order[:shipping_address],
+        note: "From order #{to_order[:number]}. Note: #{to_order[:note]}",
+        line_items: [{
+          quantity: to_order[:quantity],
+          title: title,
+          price: 15.00,
+          requires_shipping: true,
+          grams: 114,
+        }]
+      )
     end
   end
 
   def self.explode_orders!
     eo = ExplodedOrder.order("shopify_id DESC").last
     last_processed_id = eo.nil? ? 1 : eo.shopify_id
-    zines_to_order = zines_since(last_processed_id)
-    last_processed_id = zines_to_order.map{|z| z[:id]}.max
-    ExplodedOrder.create!(shopify_id: last_processed_id) if last_processed_id
-    create_orders(zines_to_order)
+
+    zines_since(last_processed_id).each do |subscription|
+      with_retry { create_order(subscription) }
+      ExplodedOrder.create!(shopify_id: order[:id])
+    end
   end
 
 end
