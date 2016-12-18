@@ -87,7 +87,7 @@ module BubbleSort
 
     zines_since(last_processed_id).each do |subscription|
       with_retry { create_order(subscription) }
-      ExplodedOrder.create!(shopify_id: order[:id])
+      ExplodedOrder.create!(shopify_id: subscription[:id])
     end
   end
 
