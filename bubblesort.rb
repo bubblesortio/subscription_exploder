@@ -28,9 +28,11 @@ module BubbleSort
       retried = false
     rescue ActiveResource::ConnectionError, ActiveResource::ServerError,
       ActiveResource::ClientError => ex
+      puts "Request failed!\n#{ex.class}: #{ex.message}"
       unless retried
         header_retry = ex.respond_to?(:response) && ex.response['Retry-After']
         retry_after = (header_retry || default_retry).to_i
+        puts "Retrying request in #{retry_after} seconds..."
         sleep(retry_after)
         retried = true
         retry
