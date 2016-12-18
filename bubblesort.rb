@@ -42,8 +42,7 @@ module BubbleSort
   def self.create_orders(zines_to_order)
     zines_to_order.each do |to_order|
       to_order[:zines].each do |title|
-        to_order = zines_to_order.first
-        title = to_order[:zines].first
+        puts "Creating exploded order of #{title} for #{to_order[:email]} from order #{to_order[:number]}"
         ShopifyAPI::Order.create(
           email: to_order[:email],
           financial_status: "paid",
