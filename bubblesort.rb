@@ -70,6 +70,7 @@ module BubbleSort
         financial_status: "paid",
         shipping_address: to_order[:shipping_address],
         note: "From order #{to_order[:number]}. Note: #{to_order[:note]}",
+        tags: "subscription",
         line_items: [{
           quantity: to_order[:quantity],
           title: title,
