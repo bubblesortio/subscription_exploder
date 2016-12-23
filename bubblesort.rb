@@ -1,5 +1,6 @@
 require_relative "./exploded_order"
 require_relative "./shopify_api"
+require_relative "./rollbar"
 
 module BubbleSort
   ZINE_NAMES = [
@@ -98,6 +99,9 @@ module BubbleSort
       with_retry { create_order(subscription) }
       ExplodedOrder.create!(shopify_id: subscription[:id])
     end
+  rescue Exception => e
+    Rollbar.error(e)
+    raise(e)
   end
 
 end
