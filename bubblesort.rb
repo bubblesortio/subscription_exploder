@@ -45,6 +45,13 @@ module BubbleSort
   def self.zines_since(last_processed_id)
     zines_to_order = []
     ShopifyAPI::Order.find_all(since_id: last_processed_id) do |sub|
+      next if sub.tags.include?("subscription")
+
+      with_retry do
+        sub.tags = "store"
+        sub.save
+      end
+
       sub.line_items.each do |li|
         next unless VARIANT_ZINES.has_key?(li.variant_id)
         names = VARIANT_ZINES[li.variant_id]
@@ -59,6 +66,7 @@ module BubbleSort
         )
       end
     end
+
     zines_to_order
   end
 
