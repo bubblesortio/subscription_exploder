@@ -1,0 +1,2 @@
+#!/bin/sh
+HEROKU_APP=bubblesort-subs-exploder HKAPP=bubblesort-subs-exploder exec "${HEROKU_COMMAND:-heroku}" "$@"
