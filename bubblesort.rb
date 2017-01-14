@@ -28,7 +28,7 @@ module BubbleSort
       yield
       retried = false
     rescue ActiveResource::ConnectionError, ActiveResource::ServerError,
-      ActiveResource::ClientError => ex
+      ActiveResource::ClientError, SocketError => ex
       puts "Request failed!\n#{ex.class}: #{ex.message}"
       unless retried
         header_retry = ex.respond_to?(:response) && ex.response['Retry-After']
