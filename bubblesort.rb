@@ -96,11 +96,17 @@ module BubbleSort
     last_processed_id = eo.nil? ? 1 : eo.shopify_id
 
     zines_since(last_processed_id).each do |subscription|
-      with_retry { create_order(subscription) }
-      ExplodedOrder.create!(shopify_id: subscription[:id])
+      begin
+        with_retry { create_order(subscription) }
+        ExplodedOrder.create!(shopify_id: subscription[:id])
+      rescue Exception => e
+        Rollbar.error(e, subscription: subscription.inspect)
+        puts "reported #{e} to Rollbar: #{e.message}\n" \
+          "#{e.backtrace.join("\n  ")}"
+      end
     end
   rescue Exception => e
-    Rollbar.error(e)
+    Rollbar.error(e, exploded_order: eo.inspect)
     raise(e)
   end
 
