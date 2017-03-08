@@ -43,16 +43,26 @@ module BubbleSort
     end
   end
 
-  def self.zines_since(last_processed_id)
-    zines_to_order = []
-    ShopifyAPI::Order.find_all(since_id: last_processed_id) do |sub|
-      next if sub.tags.include?("subscription")
+  def self.orders_since(last_processed_id)
+    orders = ShopifyAPI::Order.find(:all, params: {since_id: last_processed_id})
+    orders.reject{|sub| sub.tags.include?("subscription") }
+  end
 
+  def self.tag_store_orders(orders)
+    untagged = orders.select{|sub| sub.tags.empty? }
+    untagged.each do |sub|
       with_retry do
         sub.tags = "store"
         sub.save
+        sleep 1
       end
+    end
+  end
 
+  def self.zines_to_order_for(orders)
+    zines_to_order = []
+
+    orders.each do |sub|
       sub.line_items.each do |li|
         next unless VARIANT_ZINES.has_key?(li.variant_id)
         names = VARIANT_ZINES[li.variant_id]
@@ -91,20 +101,31 @@ module BubbleSort
     end
   end
 
+  def self.explode_subscription(subscription)
+    with_retry { create_order(subscription) }
+    ExplodedOrder.create!(shopify_id: subscription[:id])
+  rescue Exception => e
+    Rollbar.error(e, subscription: subscription.inspect)
+    puts "reported #{e} to Rollbar: #{e.message}\n" \
+      "#{e.backtrace.join("\n  ")}"
+  end
+
   def self.explode_orders!
     eo = ExplodedOrder.order(:shopify_id).last
     last_processed_id = eo.nil? ? 1 : eo.shopify_id
 
-    zines_since(last_processed_id).each do |subscription|
-      begin
-        with_retry { create_order(subscription) }
-        ExplodedOrder.create!(shopify_id: subscription[:id])
-      rescue Exception => e
-        Rollbar.error(e, subscription: subscription.inspect)
-        puts "reported #{e} to Rollbar: #{e.message}\n" \
-          "#{e.backtrace.join("\n  ")}"
-      end
+    orders = orders_since(last_processed_id)
+    return if orders.empty?
+
+    tag_store_orders(orders)
+
+    zines_to_order_for(orders).each do |subscription|
+      explode_subscription(subscription)
     end
+
+    last_id = orders.map(&:id).sort.last
+    puts "exploded up to order #{last_id}!"
+    ExplodedOrder.create!(shopify_id: last_id)
   rescue Exception => e
     Rollbar.error(e, exploded_order: eo.inspect)
     raise(e)
