@@ -45,7 +45,7 @@ module BubbleSort
 
   def self.orders_since(last_processed_id)
     orders = ShopifyAPI::Order.find(:all, params: {since_id: last_processed_id})
-    orders.reject{|sub| sub.tags.include?("subscription") }
+    orders.nil? ? [] : orders.reject{|sub| sub.tags.include?("subscription") }
   end
 
   def self.tag_store_orders(orders)
