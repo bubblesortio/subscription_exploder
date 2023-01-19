@@ -1,32 +1,33 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (4.2.7.1)
-      activesupport (= 4.2.7.1)
-      builder (~> 3.1)
-    activerecord (4.2.7.1)
-      activemodel (= 4.2.7.1)
-      activesupport (= 4.2.7.1)
-      arel (~> 6.0)
-    activeresource (4.1.0)
-      activemodel (~> 4.0)
-      activesupport (~> 4.0)
-      rails-observers (~> 0.1.2)
-    activesupport (4.2.7.1)
-      i18n (~> 0.7)
-      json (~> 1.7, >= 1.7.7)
-      minitest (~> 5.1)
-      thread_safe (~> 0.3, >= 0.3.4)
-      tzinfo (~> 1.1)
-    arel (6.0.3)
-    builder (3.2.2)
+    activemodel (6.1.7.1)
+      activesupport (= 6.1.7.1)
+    activerecord (6.1.7.1)
+      activemodel (= 6.1.7.1)
+      activesupport (= 6.1.7.1)
+    activesupport (6.1.7.1)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 1.6, < 2)
+      minitest (>= 5.1)
+      tzinfo (~> 2.0)
+      zeitwerk (~> 2.3)
     coderay (1.1.1)
-    i18n (0.7.0)
-    json (1.8.6)
+    concurrent-ruby (1.1.10)
+    hash_diff (1.1.1)
+    httparty (0.21.0)
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
+    i18n (1.12.0)
+      concurrent-ruby (~> 1.0)
+    jwt (2.6.0)
     method_source (0.8.2)
-    minitest (5.10.1)
+    mini_mime (1.1.2)
+    minitest (5.17.0)
     multi_json (1.12.1)
+    multi_xml (0.6.0)
     oj (2.18.5)
+    openssl (3.1.0)
     pg (0.19.0)
     pry (0.10.4)
       coderay (~> 1.1.0)
@@ -35,26 +36,34 @@ GEM
     rack (1.6.5)
     rack-protection (1.5.3)
       rack
-    rails-observers (0.1.2)
-      activemodel (~> 4.0)
     rake (10.4.2)
     rollbar (2.14.0)
       multi_json
-    shopify_api (4.3.3)
-      activeresource (>= 3.0.0)
-      rack
+    securerandom (0.2.2)
+    shopify_api (12.4.0)
+      activesupport
+      concurrent-ruby
+      hash_diff
+      httparty
+      jwt
+      oj
+      openssl
+      securerandom
+      sorbet-runtime
+      zeitwerk (~> 2.5, < 2.6.5)
     sinatra (1.4.7)
       rack (~> 1.5)
       rack-protection (~> 1.4)
       tilt (>= 1.3, < 3)
-    sinatra-activerecord (2.0.11)
-      activerecord (>= 3.2)
-      sinatra (~> 1.0)
+    sinatra-activerecord (2.0.26)
+      activerecord (>= 4.1)
+      sinatra (>= 1.0)
     slop (3.6.0)
-    thread_safe (0.3.5)
+    sorbet-runtime (0.5.10461)
     tilt (2.0.5)
-    tzinfo (1.2.2)
-      thread_safe (~> 0.1)
+    tzinfo (2.0.5)
+      concurrent-ruby (~> 1.0)
+    zeitwerk (2.6.4)
 
 PLATFORMS
   ruby
